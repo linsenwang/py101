@@ -1,7 +1,11 @@
 site_name: AI Programming in Python
 
+copyright: Atheris hispida
+
 theme:
   name: material
+  favicon: assets/favicon.png
+  logo: assets/logo.png
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -25,9 +29,6 @@ plugins:
           build: true
           site_name: 人工智能程序设计
   - search:
-    # lang:
-    #   - zh
-    #   - en
 
 extra_css:
-  - overrides/extra.css
+  - stylesheets/extra.css
