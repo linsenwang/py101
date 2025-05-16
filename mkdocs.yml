@@ -1,41 +1,63 @@
 site_name: AI Programming in Python
-
 copyright: Atheris hispida
-
 theme:
   name: material
   favicon: assets/favicon.png
   logo: assets/logo.png
   features:
-    - navigation.tracking
-    - navigation.footer
-    - header.autohide
-    - search.highlight
-    - search.suggest
-    - content.code.copy
-
+  - navigation.tracking
+  - navigation.footer
+  - navigation.expand
+  - header.autohide
+  - search.highlight
+  - search.suggest
+  - content.code.copy
 markdown_extensions:
-  - pymdownx.highlight:
-      anchor_linenums: true
-      line_spans: __span
-      pygments_lang_class: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
-  - pymdownx.superfences
-
+- pymdownx.highlight:
+    anchor_linenums: true
+    line_spans: __span
+    pygments_lang_class: true
+- pymdownx.inlinehilite
+- pymdownx.snippets
+- pymdownx.superfences
+- admonition
+- pymdownx.details
 plugins:
-  - i18n:
-      docs_structure: suffix
-      languages:
-        - locale: en
-          default: true
-          name: English
-          build: true
-        - locale: zh
-          name: 中文
-          build: true
-          site_name: 人工智能程序设计
-  - search:
-
+- i18n:
+    docs_structure: suffix
+    languages:
+    - locale: en
+      default: true
+      name: English
+      build: true
+    - locale: zh
+      name: 中文
+      build: true
+      site_name: 人工智能程序设计
+- search: null
 extra_css:
-  - stylesheets/extra.css
+- stylesheets/extra.css
+nav:
+- AI Programming in Python (Fall 2025): index.en.md
+- 人工智能程序设计（2024-2025第2学期）: index.zh.md
+- Lecture 1:
+  - Code 0: Lecture_1/code-0.md
+  - Code 1: Lecture_1/code-1.md
+  - 1.1 Basics: Lecture_1/slide_1_1.md
+  - 1.2 Basics: Lecture_1/slide_1_2.md
+- Models:
+  - Programming for AI (Python): models/ds-c.md
+  - Programming for AI (Python): models/ds-r.md
+  - Programming for AI (Python): models/gemini.md
+  - Programming for AI (Python): models/qwen.md
+- Prompts:
+  - 'Programming for AI (Python) - Chapter 1: Basics': prompts/slide_1_1.en.md
+  - Programming for AI (Python): prompts/slide_1_1_ai-1.en.md
+  - Programming for AI (Python): prompts/slide_1_1_ai-2.en.md
+  - Programming for AI (Python) 3: prompts/slide_1_1_ai-3.en.md
+- Lecture 2:
+  - 2.1 Functions: Lecture_2/slide_2_1.md
+- Achieve:
+  - 'Chapter 1 Basics: Iterables and Iterators': Achieve/Lecture_1_Iterable.en.md
+  - 第一章 基础：可迭代对象与迭代器: Achieve/Lecture_1_Iterable.zh.md
+  - AI Programming in Python (Fall 2025): Achieve/index.en-f.md

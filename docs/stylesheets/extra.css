@@ -8,3 +8,7 @@
 
     --md-accent-fg-color--transparent: #5a9fd41a;
   }
+
+.md-overlay {
+  backdrop-filter: blur(10px);
+}
