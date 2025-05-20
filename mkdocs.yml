@@ -1,4 +1,5 @@
 site_name: AI Programming in Python
+# site_url: http://127.0.0.1:8000/
 copyright: Atheris hispida
 theme:
   name: material
@@ -37,7 +38,7 @@ plugins:
 - search: null
 
 extra_css:
-  - stylesheets/extra.extra_css
+  - stylesheets/extra.css
 
 extra_javascript:
   - javascripts/chat.js

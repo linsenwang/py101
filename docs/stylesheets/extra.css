@@ -12,3 +12,21 @@
 .md-overlay {
   backdrop-filter: blur(10px);
 }
+
+.md-search {
+  padding: .2rem .1rem;
+}
+
+/* 
+body {
+  width: 100%;
+  background-color: var(--md-primary-fg-color);
+}
+
+.md-container {
+  background-color: var(--md-primary-bg-color);
+}
+
+.md-header--shadow {
+  box-shadow: 0 .2rem .2rem #0001, 0 .4rem .6rem #0003;
+} */
