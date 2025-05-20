@@ -35,26 +35,9 @@ plugins:
       build: true
       site_name: 人工智能程序设计
 - search: null
+
 extra_css:
-- stylesheets/extra.css
-# nav:
-# - AI Programming in Python (Fall 2025): index.en.md
-# - 人工智能程序设计（2024-2025第2学期）: index.zh.md
-# - Lecture 1:
-#   - Code 0: Lecture_1/code-0.md
-#   - Code 1: Lecture_1/code-1.md
-#   - 1.1 Basics: Lecture_1/slide_1_1.md
-#   - 1.2 Basics: Lecture_1/slide_1_2.md
-# - Lecture 2:
-#   - 2.1 Functions: Lecture_2/slide_2_1.md
-#   - 'Chapter 2: Functions': Lecture_2/slide_2_2.md
-# - Models:
-#   - Programming for AI (Python): models/ds-c.md
-#   - Programming for AI (Python): models/ds-r.md
-#   - Programming for AI (Python): models/gemini.md
-#   - Programming for AI (Python): models/qwen.md
-# - Prompts:
-#   - 'Programming for AI (Python) - Chapter 1: Basics': prompts/slide_1_1.en.md
-#   - Programming for AI (Python): prompts/slide_1_1_ai-1.en.md
-#   - Programming for AI (Python): prompts/slide_1_1_ai-2.en.md
-#   - Programming for AI (Python) 3: prompts/slide_1_1_ai-3.en.md
+  - stylesheets/extra.extra_css
+
+extra_javascript:
+  - javascripts/chat.js
