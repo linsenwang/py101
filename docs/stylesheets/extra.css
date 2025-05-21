@@ -30,3 +30,10 @@ body {
 .md-header--shadow {
   box-shadow: 0 .2rem .2rem #0001, 0 .4rem .6rem #0003;
 } */
+
+.md-header {
+  position: fixed;
+}
+.md-main {
+  margin-top: 48px;
+}

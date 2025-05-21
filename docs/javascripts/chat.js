@@ -68,7 +68,7 @@ class AIChatPlugin {
     this.chatHeader.className = 'md-chat-ai-plugin__header';
     this.chatHeader.textContent = this.aiName;
     Object.assign(this.chatHeader.style, {
-      padding: '24px',
+      padding: '36px',
       backgroundColor: '#0000',
       fontWeight: 'bold',
       // borderBottom: '1px solid #ccc',
@@ -82,6 +82,7 @@ class AIChatPlugin {
       flexGrow: '1',
       overflowY: 'auto',
       padding: '10px',
+      paddingTop: '72px',
       display: 'flex',
       flexDirection: 'column',
     });
@@ -145,7 +146,7 @@ class AIChatPlugin {
 
     // Style main container for transition
     this.container.style.transition = 'width 0.3s ease';
-    this.header.style.transition = 'width 0.3s ease';
+    // this.header.style.transition = 'width 0.3s ease';
     this.container.style.width = '100%';
     this.container.style.marginRight = '0px';
 
@@ -177,7 +178,7 @@ class AIChatPlugin {
       // Close chat
       this.container.style.width = '100%';
       this.container.style.marginRight = '0px'; // Reset margin
-      this.header.style.width = '100%';
+      // this.header.style.width = '100%';
       // this.container.style.borderRight = ''; // Optional: remove border
       this.chatDiv.style.width = '0px';
       this.chatDiv.style.padding = '0'; // Avoid padding showing when closed
@@ -186,7 +187,7 @@ class AIChatPlugin {
       // Open chat
       this.container.style.width = `calc(100% - ${this.chatWidth})`;
       this.container.style.marginRight = this.chatWidth; // Push container left
-      this.header.style.width = `calc(100% - ${this.chatWidth})`;
+      // this.header.style.width = `calc(100% - ${this.chatWidth})`;
       // this.container.style.borderRight = '#eee solid 1px'; // Optional: add border
       this.chatDiv.style.width = this.chatWidth;
       this.chatDiv.style.padding = ''; // Reset padding
@@ -322,7 +323,7 @@ const pluginStyles = `
     top: 50%;                      /* 垂直居中 */
     transform: translate(50%, -100%);
     right: 150px;                  /* 距离右边 300px 区域的中点 */
-    z-index: 9999;                 /* 确保显示在最上层 */
+    z-index: 0;                 /* 确保显示在最上层 */
     pointer-events: none;          /* 不阻挡用户操作 */
 }
 `;
