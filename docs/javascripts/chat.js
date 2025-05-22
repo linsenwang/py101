@@ -296,8 +296,9 @@ class AIChatPlugin {
 
 async _getAIResponse(userInput) {
   // 1. 添加打字指示器，并获取该DOM元素的引用
+  // 我们希望这个元素在流式传输时更新其 textContent，在流结束后更新其 innerHTML
   this._addMessageToUI('...', 'ai');
-  const aiMessageElement = this.messagesArea.lastChild; // 假设这是你刚添加的打字指示器元素
+  const aiMessageElement = this.messagesArea.lastChild;
 
   try {
     const response = await fetch("http://127.0.0.1:5000/chat", {
@@ -308,99 +309,106 @@ async _getAIResponse(userInput) {
       body: JSON.stringify({ message: userInput })
     });
 
-    // 2. 检查响应是否成功
     if (!response.ok) {
-      // 如果服务器返回了错误状态 (如 4xx, 5xx)
-      // 尝试读取错误信息（可能是纯文本或JSON）
       let errorText = `HTTP error! status: ${response.status}`;
       try {
-        const errorData = await response.json(); // 或者 response.text()
+        const errorData = await response.json();
         errorText = errorData.error || errorData.message || JSON.stringify(errorData);
       } catch (e) {
-        // 如果错误响应不是JSON，或者解析失败，使用原始文本
         errorText = await response.text() || errorText;
       }
       throw new Error(errorText);
     }
 
-    // 3. 处理流式响应
     const reader = response.body.getReader();
-    const decoder = new TextDecoder(); // 用于将 Uint8Array 转换为字符串
-    let accumulatedText = "";
+    const decoder = new TextDecoder();
+    let accumulatedMarkdown = ""; // 用于累积Markdown文本
     let firstChunkReceived = false;
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const { done, value } = await reader.read(); // 读取一块数据
+      const { done, value } = await reader.read();
 
       if (done) {
         break; // 流结束
       }
 
-      const chunk = decoder.decode(value, { stream: true }); // 解码当前块
-      accumulatedText += chunk;
+      const chunk = decoder.decode(value, { stream: true });
+      accumulatedMarkdown += chunk;
 
+      // 在流式传输过程中，实时更新元素的 textContent (显示原始 Markdown)
       if (!firstChunkReceived && aiMessageElement.textContent === '...') {
-        // 如果是第一个有效块，替换掉 '...'
-        aiMessageElement.textContent = chunk;
+        aiMessageElement.textContent = chunk; // 替换 '...'
         firstChunkReceived = true;
       } else {
-        // 后续块则追加到现有内容
-        aiMessageElement.textContent = accumulatedText; // 更新整个累积文本
+        aiMessageElement.textContent = accumulatedMarkdown; // 追加显示
       }
-      
-      // 自动滚动到消息区域底部
       this.messagesArea.scrollTop = this.messagesArea.scrollHeight;
     }
 
     // 4. 流处理完毕
-    if (accumulatedText) {
-      // 如果aiMessageElement已经被上面的循环更新了，这里就不需要再次调用 _addMessageToUI
-      // 只需要更新聊天历史
-      this.chatHistory.push({ sender: 'ai', text: accumulatedText });
+    if (accumulatedMarkdown) {
+      // 使用 marked 解析 Markdown
+      // 注意：确保 marked 和 DOMPurify 已经正确加载
+      // 如果你是在浏览器环境中直接使用 <script> 标签引入的，它们会是全局变量
+      // 如果你使用模块系统，确保已 import
+      const unsafeHtml = marked.parse(accumulatedMarkdown);
+
+      // 使用 DOMPurify 清洁 HTML 以防止 XSS
+      const safeHtml = DOMPurify.sanitize(unsafeHtml);
+
+      // 将解析和清洁后的 HTML 设置到元素的 innerHTML
+      aiMessageElement.innerHTML = safeHtml;
+      this.messagesArea.scrollTop = this.messagesArea.scrollHeight; // 再次滚动到底部
+
+      // 将原始 Markdown 存入聊天历史
+      this.chatHistory.push({ sender: 'ai', text: accumulatedMarkdown });
+
     } else {
-      // 如果流结束了但没有任何内容 (不太可能，但作为保障)
       aiMessageElement.textContent = "Sorry, no reply from AI.";
       this.chatHistory.push({ sender: 'ai', text: "Sorry, no reply from AI." });
     }
 
   } catch (error) {
     console.error("Error fetching AI response:", error);
-    const errorMessage = error.message && error.message.includes("HTTP error!") 
+    const errorMessage = error.message && error.message.includes("HTTP error!")
       ? `AI Error: ${error.message.replace("HTTP error! status: ", "")}`
       : "Oops! Something went wrong with the AI response.";
-    
-    if (aiMessageElement && aiMessageElement.textContent === '...') {
-      // 如果错误发生在打字指示器还在显示时
-      aiMessageElement.textContent = errorMessage;
+
+    if (aiMessageElement && (aiMessageElement.textContent === '...' || aiMessageElement.innerHTML === '...')) {
+      aiMessageElement.textContent = errorMessage; // 错误时显示纯文本
     } else if (aiMessageElement) {
-      // 如果流已经开始，但中途出错，可以考虑追加错误信息或替换
-      // 为了简单，这里也替换
       aiMessageElement.textContent = errorMessage;
     } else {
-      // 极端情况，打字指示器都未能正确添加
       this._addMessageToUI(errorMessage, 'ai');
     }
-    // 确保错误消息也加入历史记录（如果需要）
     if (!this.chatHistory.find(msg => msg.text === errorMessage && msg.sender === 'ai')) {
         this.chatHistory.push({ sender: 'ai', text: errorMessage });
     }
   }
 }
 
-// 你可能需要稍微调整 _addMessageToUI，如果它还没有返回创建的元素的话
-// 或者像上面那样，通过 this.messagesArea.lastChild 获取。
-// 这是一个 _addMessageToUI 的示例，它创建并返回元素，方便后续修改：
+// 你的 _addMessageToUI 方法可能需要调整，以确保它能正确处理初始的 "..."
+// 并且能被 aiMessageElement = this.messagesArea.lastChild; 正确获取。
+// 例如：
 /*
-_addMessageToUI(text, sender, returnElement = false) {
+_addMessageToUI(content, sender) {
   const messageElement = document.createElement('div');
-  messageElement.classList.add('message', sender); // 假设你有 'message' 和 'ai'/'user' 类
-  messageElement.textContent = text;
+  messageElement.classList.add('message', `message-${sender}`); // e.g., message-ai, message-user
+
+  if (sender === 'ai' && content === '...') {
+    messageElement.textContent = '...'; // 初始打字指示器
+  } else if (sender === 'ai' && content.startsWith('<')) { // 假设HTML内容
+    messageElement.innerHTML = content; // 如果直接传入HTML (一般不推荐除非已净化)
+  }
+  else {
+    messageElement.textContent = content; // 普通文本
+  }
+
   this.messagesArea.appendChild(messageElement);
   this.messagesArea.scrollTop = this.messagesArea.scrollHeight;
-  if (returnElement) {
-    return messageElement;
-  }
+  // 如果需要返回元素供外部修改，可以加上:
+  // return messageElement;
 }
 */
 
