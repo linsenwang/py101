@@ -25,6 +25,70 @@ class AIChatPlugin {
   _initUI() {
     // 1. Create Chat Div
     this.chatDiv = document.createElement('div');
+    // this.chatDiv.addEventListener('wheel', (e) => {
+    //   const delta = e.deltaY;
+    //   const scrollTop = this.chatDiv.scrollTop;
+    //   const scrollHeight = this.chatDiv.scrollHeight;
+    //   const clientHeight = this.chatDiv.clientHeight;
+
+    //   const atTop = scrollTop === 0;
+    //   const atBottom = scrollTop + clientHeight >= scrollHeight - 1; // 加点容差
+
+    //   const scrollingUp = delta < 0;
+    //   const scrollingDown = delta > 0;
+
+    //   const canScrollUp = !atTop;
+    //   const canScrollDown = !atBottom;
+
+    //   // 只有当容器本身无法滚动时才阻止默认行为
+    //   if ((scrollingUp && !canScrollUp) || (scrollingDown && !canScrollDown)) {
+    //     // 在 chatDiv 无法滚动的情况下，才阻止默认行为，防止滚动穿透
+    //     e.preventDefault();
+    //   }
+    // }, { passive: false });
+
+    this.chatDiv.addEventListener('wheel', (e) => {
+  const delta = e.deltaY;
+  const targetElement = e.target;
+
+  // 确保 this.messagesArea 存在并且是一个有效的 DOM 元素
+  // 并且事件目标是 messagesArea 或其内部的元素
+  if (this.messagesArea &&
+      (this.messagesArea.contains(targetElement) || targetElement === this.messagesArea)) {
+
+    const ma = this.messagesArea;
+    const messagesAreaScrollTop = ma.scrollTop;
+    const messagesAreaScrollHeight = ma.scrollHeight;
+    const messagesAreaClientHeight = ma.clientHeight;
+
+    // 检查 messagesArea 是否可以在当前滚动方向上滚动
+    const canMessagesAreaScrollUp = delta < 0 && messagesAreaScrollTop > 0;
+    // 使用一个小的容差值 (1) 来处理可能的亚像素渲染问题
+    const canMessagesAreaScrollDown = delta > 0 && (messagesAreaScrollHeight - messagesAreaScrollTop - messagesAreaClientHeight) > 1;
+
+    if (canMessagesAreaScrollUp || canMessagesAreaScrollDown) {
+      // 如果 messagesArea 可以滚动，则不执行 e.preventDefault()，允许其滚动
+      return;
+    }
+    // 如果 messagesArea 已经到达其滚动边界（对于当前滚动方向），
+    // 则事件将“穿透”到 chatDiv，下面的逻辑会处理 chatDiv 的边界。
+  }
+
+  // 如果事件不是在 messagesArea 内部，或者 messagesArea 已在其边界：
+  // 检查 chatDiv 本身的滚动状态
+  const chatDivScrollTop = this.chatDiv.scrollTop;
+  const chatDivScrollHeight = this.chatDiv.scrollHeight;
+  const chatDivClientHeight = this.chatDiv.clientHeight;
+
+  const atTop = chatDivScrollTop === 0;
+  // 使用一个小的容差值 (1) 来处理可能的亚像素渲染问题
+  const atBottom = (chatDivScrollHeight - chatDivScrollTop - chatDivClientHeight) < 1;
+
+  if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
+    e.preventDefault(); // 阻止 chatDiv (以及页面) 的默认滚动行为
+  }
+}, { passive: false });
+
     this.chatDiv.className = 'md-typeset md-chat-ai-plugin';
     Object.assign(this.chatDiv.style, {
       position: 'fixed',
@@ -209,37 +273,63 @@ class AIChatPlugin {
     this._getAIResponse(messageText);
   }
 
-  _addMessageToUI(text, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `md-chat-ai-plugin__message md-chat-ai-plugin__message--${sender}`;
-    messageDiv.textContent = text;
+  _addMessageToUI(text, sender, returnElement = false) {
+    const messageElement = document.createElement('div');
 
-    Object.assign(messageDiv.style, {
+    // Use the specific class names from your desired UI
+    messageElement.className = `md-chat-ai-plugin__message md-chat-ai-plugin__message--${sender}`;
+
+    // For placeholders or simple text like errors, textContent is fine.
+    // Markdown content might later be set via innerHTML if this element is returned
+    // and processed further (e.g., by a function like _getAIResponse).
+    messageElement.textContent = text;
+
+    // Apply common styles from your desired UI
+    Object.assign(messageElement.style, {
       padding: '6px 10px',
-      borderRadius: '.2rem',
+      // margin: '6px 10px',
+      borderRadius: '.2rem', // General radius, will be partially overridden below
       marginBottom: '10px',
-      maxWidth: '80%',
+      maxWidth: '100%',
       wordWrap: 'break-word',
+      zIndex: '1',
     });
 
+    // Apply sender-specific styles from your desired UI
     if (sender === 'user') {
-      Object.assign(messageDiv.style, {
-        backgroundColor: 'var(--md-primary-fg-color)',
+      Object.assign(messageElement.style, {
+        backgroundColor: 'var(--md-primary-fg-color)', // Make sure this CSS variable is defined
         color: 'white',
         alignSelf: 'flex-end',
-        borderBottomRightRadius: '0px',
+        borderBottomRightRadius: '0px', // Specific corner for "speech bubble" tail
       });
-    } else { // AI
-      Object.assign(messageDiv.style, {
-        backgroundColor: 'var(--md-code-bg-color)',
-        color: '#333',
+    } else { // AI or other senders
+      Object.assign(messageElement.style, {
+        // backgroundColor: 'var(--md-code-bg-color)', // Make sure this CSS variable is defined
+        backgroundColor: '#fff',
+        border: '1px solid var(--md-default-fg-color--lightest)',
+        color: 'var(--md-typeset-fg-color, #333)', // Using a theme variable for text color if available, else fallback
         alignSelf: 'flex-start',
-        borderBottomLeftRadius: '0px',
+        borderBottomLeftRadius: '0px', // Specific corner for "speech bubble" tail
       });
     }
 
-    this.messagesArea.appendChild(messageDiv);
+    // Ensure this.messagesArea is a valid DOM element (from the first example)
+    if (!this.messagesArea || typeof this.messagesArea.appendChild !== 'function') {
+      console.error("Error in _addMessageToUI: this.messagesArea is not a valid DOM element.");
+      if (returnElement) {
+        return null; // If we're supposed to return an element, but can't even append, return null.
+      }
+      return; // Exit if messagesArea is invalid
+    }
+
+    this.messagesArea.appendChild(messageElement);
     this.messagesArea.scrollTop = this.messagesArea.scrollHeight; // Scroll to bottom
+
+    if (returnElement) {
+      return messageElement; // <-- CRITICAL: Return the created element (from the first example)
+    }
+    // If returnElement is false (or default), it implicitly returns undefined
   }
 
   // async _getAIResponse(userInput) {
@@ -296,9 +386,9 @@ class AIChatPlugin {
 
 async _getAIResponse(userInput) {
   // 1. 添加打字指示器，并获取该DOM元素的引用
-  // 我们希望这个元素在流式传输时更新其 textContent，在流结束后更新其 innerHTML
-  this._addMessageToUI('...', 'ai');
-  const aiMessageElement = this.messagesArea.lastChild;
+  // Let's assume _addMessageToUI can return the element or we get it like before
+  // For clarity, let's say _addMessageToUI now *always* returns the element if asked
+  const aiMessageElement = this._addMessageToUI('...', 'ai', true); // Pass true to get the element back
 
   try {
     const response = await fetch("http://127.0.0.1:5000/chat", {
@@ -309,6 +399,7 @@ async _getAIResponse(userInput) {
       body: JSON.stringify({ message: userInput })
     });
 
+    // 2. 检查响应是否成功
     if (!response.ok) {
       let errorText = `HTTP error! status: ${response.status}`;
       try {
@@ -320,95 +411,105 @@ async _getAIResponse(userInput) {
       throw new Error(errorText);
     }
 
+    // 3. 处理流式响应
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let accumulatedMarkdown = ""; // 用于累积Markdown文本
-    let firstChunkReceived = false;
+    let accumulatedText = ""; // This will store the raw Markdown text
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const { done, value } = await reader.read();
 
       if (done) {
-        break; // 流结束
+        break;
       }
 
       const chunk = decoder.decode(value, { stream: true });
-      accumulatedMarkdown += chunk;
+      accumulatedText += chunk;
 
-      // 在流式传输过程中，实时更新元素的 textContent (显示原始 Markdown)
-      if (!firstChunkReceived && aiMessageElement.textContent === '...') {
-        aiMessageElement.textContent = chunk; // 替换 '...'
-        firstChunkReceived = true;
+      // Convert accumulated Markdown to HTML and render
+      // Ensure 'marked' is available in this scope (e.g., window.marked or imported)
+      // Basic usage:
+      // For security, especially if the Markdown source is not fully trusted,
+      // you might want to sanitize the output of marked.parse.
+      // For example, using DOMPurify: DOMPurify.sanitize(marked.parse(accumulatedText))
+      // For simplicity here, we'll use marked.parse directly.
+      if (typeof marked !== 'undefined') {
+        aiMessageElement.innerHTML = marked.parse(accumulatedText);
       } else {
-        aiMessageElement.textContent = accumulatedMarkdown; // 追加显示
+        // Fallback if marked is not loaded: show plain text
+        console.warn("Marked library not found. Displaying raw text.");
+        aiMessageElement.textContent = accumulatedText;
       }
+      
+      // 自动滚动到消息区域底部
       this.messagesArea.scrollTop = this.messagesArea.scrollHeight;
     }
 
     // 4. 流处理完毕
-    if (accumulatedMarkdown) {
-      // 使用 marked 解析 Markdown
-      // 注意：确保 marked 和 DOMPurify 已经正确加载
-      // 如果你是在浏览器环境中直接使用 <script> 标签引入的，它们会是全局变量
-      // 如果你使用模块系统，确保已 import
-      const unsafeHtml = marked.parse(accumulatedMarkdown);
-
-      // 使用 DOMPurify 清洁 HTML 以防止 XSS
-      const safeHtml = DOMPurify.sanitize(unsafeHtml);
-
-      // 将解析和清洁后的 HTML 设置到元素的 innerHTML
-      aiMessageElement.innerHTML = safeHtml;
-      this.messagesArea.scrollTop = this.messagesArea.scrollHeight; // 再次滚动到底部
-
-      // 将原始 Markdown 存入聊天历史
-      this.chatHistory.push({ sender: 'ai', text: accumulatedMarkdown });
-
+    if (accumulatedText) {
+      // The content is already rendered in aiMessageElement via innerHTML.
+      // Just update chat history with the raw Markdown.
+      this.chatHistory.push({ sender: 'ai', text: accumulatedText });
     } else {
-      aiMessageElement.textContent = "Sorry, no reply from AI.";
-      this.chatHistory.push({ sender: 'ai', text: "Sorry, no reply from AI." });
+      const noReplyMsg = "Sorry, no reply from AI.";
+      aiMessageElement.textContent = noReplyMsg; // Use textContent for simple messages
+      this.chatHistory.push({ sender: 'ai', text: noReplyMsg });
     }
 
   } catch (error) {
     console.error("Error fetching AI response:", error);
-    const errorMessage = error.message && error.message.includes("HTTP error!")
+    const errorMessage = error.message && error.message.includes("HTTP error!") 
       ? `AI Error: ${error.message.replace("HTTP error! status: ", "")}`
       : "Oops! Something went wrong with the AI response.";
-
-    if (aiMessageElement && (aiMessageElement.textContent === '...' || aiMessageElement.innerHTML === '...')) {
-      aiMessageElement.textContent = errorMessage; // 错误时显示纯文本
-    } else if (aiMessageElement) {
+    
+    // Display error messages as plain text
+    if (aiMessageElement) { // aiMessageElement should exist
       aiMessageElement.textContent = errorMessage;
     } else {
+      // Fallback if aiMessageElement wasn't created (shouldn't happen with the new _addMessageToUI)
       this._addMessageToUI(errorMessage, 'ai');
     }
-    if (!this.chatHistory.find(msg => msg.text === errorMessage && msg.sender === 'ai')) {
-        this.chatHistory.push({ sender: 'ai', text: errorMessage });
+
+    // Ensure error message is in history (raw text)
+    // Avoid duplicates if error occurred after some text was already pushed
+    const lastAiHistory = this.chatHistory.length > 0 && this.chatHistory[this.chatHistory.length-1].sender === 'ai' ? this.chatHistory[this.chatHistory.length-1] : null;
+    if (!lastAiHistory || lastAiHistory.text !== accumulatedText ) { // if error occurred before any text or after different text
+        if (!this.chatHistory.find(msg => msg.text === errorMessage && msg.sender === 'ai')) {
+             this.chatHistory.push({ sender: 'ai', text: errorMessage });
+        }
+    } else if (lastAiHistory && lastAiHistory.text === accumulatedText) {
+        // If error occurred after the full text was received and pushed,
+        // it might be better to update the last message or add a new error message.
+        // For simplicity, let's assume the error message replaces the content if it was partial.
+        // If the accumulatedText was fully processed and an error happened *after*, this logic might need adjustment.
+        // The current history push for success happens *after* the loop.
+        // The error handler will ensure the error is logged.
+        // Let's ensure the error gets into history if not already the final message.
+        if (this.chatHistory.length === 0 || this.chatHistory[this.chatHistory.length-1].text !== errorMessage) {
+            this.chatHistory.push({ sender: 'ai', text: errorMessage });
+        }
     }
   }
 }
 
-// 你的 _addMessageToUI 方法可能需要调整，以确保它能正确处理初始的 "..."
-// 并且能被 aiMessageElement = this.messagesArea.lastChild; 正确获取。
-// 例如：
+// You need to make sure `_addMessageToUI` can return the created element.
+// Here's an example of how `_addMessageToUI` might look if it supports returning the element:
 /*
-_addMessageToUI(content, sender) {
+_addMessageToUI(text, sender, returnElement = false) {
   const messageElement = document.createElement('div');
-  messageElement.classList.add('message', `message-${sender}`); // e.g., message-ai, message-user
-
-  if (sender === 'ai' && content === '...') {
-    messageElement.textContent = '...'; // 初始打字指示器
-  } else if (sender === 'ai' && content.startsWith('<')) { // 假设HTML内容
-    messageElement.innerHTML = content; // 如果直接传入HTML (一般不推荐除非已净化)
-  }
-  else {
-    messageElement.textContent = content; // 普通文本
-  }
+  messageElement.classList.add('message', sender); // e.g., 'message ai' or 'message user'
+  
+  // If it's the initial '...' placeholder, or an error message, set as textContent.
+  // Actual AI responses will be set via innerHTML in _getAIResponse.
+  messageElement.textContent = text; 
 
   this.messagesArea.appendChild(messageElement);
   this.messagesArea.scrollTop = this.messagesArea.scrollHeight;
-  // 如果需要返回元素供外部修改，可以加上:
-  // return messageElement;
+
+  if (returnElement) {
+    return messageElement;
+  }
 }
 */
 
@@ -471,7 +572,14 @@ const pluginStyles = `
     right: 150px;                  /* 距离右边 300px 区域的中点 */
     z-index: 0;                 /* 确保显示在最上层 */
     pointer-events: none;          /* 不阻挡用户操作 */
-}
+  }
+  .md-chat-ai-plugin__message > :first-child {
+    margin-top: 0;
+  }
+
+  .md-chat-ai-plugin__message > :last-child {
+    margin-bottom: 0;
+  }
 `;
 
 const styleSheet = document.createElement("style");
