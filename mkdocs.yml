@@ -23,6 +23,8 @@ markdown_extensions:
 - pymdownx.superfences
 - admonition
 - pymdownx.details
+- pymdownx.arithmatex:
+      generic: true
 plugins:
 - i18n:
     docs_structure: suffix
@@ -35,12 +37,70 @@ plugins:
       name: 中文
       build: true
       site_name: 人工智能程序设计
+      nav_translations:
+        Foreword: 前言
+        "Chapter 0: Getting Started": 第0章：开始学习
+        "0.1 Syllabus": 0.1 课程大纲
+        "0.2 vscode": 0.2 vscode 编辑器入门
+        "Chapter 1: Python Basics": 第1章：Python 基础
+        "1.1 Types": 1.1 数据类型
+        "1.2 Control Flow": 1.2 控制流程
+        "1.3 Iterators": 1.3 可迭代对象
+        "1.4 Reference": 1.4 参考资料
+        "Chapter 2: Functions": 第2章：函数
+        "2.1 Function Basics": 2.1 函数基础
+        "2.2 Decorators & Recursion": 2.2 装饰器与递归
+        "Chapter 3: NumPy and Pandas": 第3章：NumPy 与 Pandas
+        "3.1 NumPy": 3.1 NumPy 基础
+        "3.2 Pandas": 3.2 Pandas 入门
+        "3.3 Pandas Practice": 3.3 Pandas 实践
+        "Chapter 4: Matplotlib": 第4章：Matplotlib 绘图
+        "4.1 Matplotlib Basics": 4.1 Matplotlib 基础
+        "4.2 Axes": 4.2 坐标轴对象
+        "4.3 More Plot Types": 4.3 更多图表类型
+        "Chapter 5: Machine Learning": 第5章：机器学习
+        "Chapter 6: Objects and Classes": 第6章：对象与类
+        "Chapter 7: LLMs and RAG": 第7章：大语言模型与 RAG
+        "7.1 Calling": 7.1 模型调用
+        "7.2 Env Requirements": 7.2 环境配置要求
+
 - search: null
 
 extra_css:
   - stylesheets/extra.css
+  - https://unpkg.com/katex@0/dist/katex.min.css
 
 extra_javascript:
   - javascripts/chat.js
+  - javascripts/grading.js
   - https://cdn.jsdelivr.net/npm/marked/marked.min.js
   - https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js
+  - javascripts/katex.js
+  - https://unpkg.com/katex@0/dist/katex.min.js
+  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js
+
+nav:
+  - "Chapter 0: Getting Started": 
+      - 0.1 Syllabus: py101_md/Lecture_0_syllabus.md
+      - 0.2 vscode: py101_md/slide_0_vscode.md
+  - "Chapter 1: Python Basics": 
+      - 1.1 Types: py101_md/slide_1_1.md
+      - 1.2 Control Flow: py101_md/slide_1_2.md
+      - 1.3 Iterators: py101_md/Lecture_1_Iterable.md
+      - 1.4 Reference: py101_md/Lecture_1_reference.md
+  - "Chapter 2: Functions": 
+      - 2.1 Function Basics: py101_md/slide_2_1.md
+      - 2.2 Decorators & Recursion: py101_md/slide_2_2.md
+  - "Chapter 3: NumPy and Pandas": 
+      - 3.1 NumPy: py101_md/slide_3_1.md
+      - 3.2 Pandas: py101_md/slide_3_2.md
+      - 3.3 Pandas Practice: py101_md/slide_3_3.md
+  - "Chapter 4: Matplotlib": 
+      - 4.1 Matplotlib Basics: py101_md/slide_4_1.md
+      - 4.2 Axes: py101_md/slide_4_2.md
+      - 4.3 More Plot Types: py101_md/slide_4_3.md
+  - "Chapter 5: Machine Learning": py101_md/slide_5_1.md
+  - "Chapter 6: Objects and Classes": py101_md/slide_6_1.md
+  - "Chapter 7: LLMs and RAG": 
+      - 7.1 Calling: py101_md/slide_7_1.md
+      - 7.2 Env Requirements: py101_md/Lecture_7_requirements.md
