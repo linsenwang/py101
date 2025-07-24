@@ -33,7 +33,28 @@ body {
 
 .md-header {
   position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  border-radius: 100px;
 }
+
+.md-search__form{
+  border-radius: 100px;
+}
+
 .md-main {
   margin-top: 48px;
+}
+
+.md-header-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px; /* 或你需要的高度 */
+  background: linear-gradient(to bottom, white, rgba(255, 255, 255, 0));
+  z-index: 4;
+  pointer-events: none; /* 可选，让它不阻止鼠标事件穿透 */
 }
