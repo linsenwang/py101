@@ -3,6 +3,7 @@ site_name: AI Programming in Python
 copyright: Atheris hispida
 theme:
   name: material
+  custom_dir: overrides
   favicon: assets/favicon.png
   logo: assets/logo.png
   features:
