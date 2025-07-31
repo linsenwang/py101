@@ -94,25 +94,22 @@
         floatWindowContainer.innerHTML = `<style>${styles}</style>${windowHTML}`;
         document.body.appendChild(floatWindowContainer);
 
-        // 2. 创建并注入悬浮切换按钮
-        const toggleButton = document.createElement('div');
-        toggleButton.className = 'md-button';
-        toggleButton.style.cssText = `
-            position: fixed; bottom: 2rem; right: 2rem; z-index: 1001;
-            width: 3rem; height: 3rem; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; background-color: var(--md-primary-fg-color);
-            color: var(--md-primary-bg-color);
-        `;
-        toggleButton.innerHTML = 'RT';
-        toggleButton.title = '打开/关闭实时翻译';
-        document.body.appendChild(toggleButton);
+        // 2. 在顶部栏创建并注入切换按钮
+        const topbar = document.querySelector(".md-header__option");
+        if (topbar) {
+            const toggleButton = document.createElement("button");
+            toggleButton.className = "md-header__button md-icon";
+            toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/></svg>'; // 之后可以替换为图标
+            toggleButton.title = '打开/关闭实时翻译';
 
-        // 3. 添加切换逻辑
-        toggleButton.addEventListener('click', () => {
-            const windowEl = document.getElementById('realtime-translation-injected-window');
-            windowEl.style.display = (windowEl.style.display === 'none') ? 'block' : 'none';
-        });
+            // 3. 添加切换逻辑
+            toggleButton.addEventListener('click', () => {
+                const windowEl = document.getElementById('realtime-translation-injected-window');
+                windowEl.style.display = (windowEl.style.display === 'none') ? 'block' : 'none';
+            });
+
+            topbar.appendChild(toggleButton);
+        }
 
         // 4. 修正后的脚本加载逻辑
         // 定义一个函数来加载脚本，返回一个Promise
