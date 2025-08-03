@@ -1,0 +1,24 @@
+{
+  "name": "@realtime-translation/frontend-widget",
+  "version": "1.0.0",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "app.js",
+    "index.html"
+  ],
+  "scripts": {
+    "start": "npx http-server . -p 8081",
+    "dev": "npm run start",
+    "build": "echo 'No explicit build step for this pre-compiled widget, assuming dist files are provided.'",
+    "lint": "echo 'No linting configured for this widget.'",
+    "test": "echo 'No tests configured for this widget.'"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
