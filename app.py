@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, Response
 from openai import OpenAI
 import os
 from flask_cors import CORS
-from llmlib.models_omni_beta import LLMClient
 from functools import partial
 
 app = Flask(__name__)
