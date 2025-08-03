@@ -142,7 +142,7 @@
     async function connectWebSocket() {
         try {
             console.log("正在从后端获取签名和翻译参数...");
-            const response = await fetch('http://localhost:3000/generate-signa');
+            const response = await fetch('/generate-signa');
             if (!response.ok) {
                 // 如果后端响应状态码不是 2xx，则抛出错误
                 throw new Error(`后端签名服务错误: ${response.status} ${response.statusText}`);
